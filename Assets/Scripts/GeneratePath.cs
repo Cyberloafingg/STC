@@ -1,15 +1,19 @@
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.Rendering;
+using System.IO;
+using Unity.Collections;
+using Unity.Core;
+using UnityEngine.Jobs;
 
 public class GeneratePath : MonoBehaviour
 {
     //读取csv文件，返回一个PathObj的List
     //遍历List，生成路径
     //这些路径应该都是在同一个父级物体下面
-    [SerializeField]
-    public STCBox STCBox;
+    
 
     [SerializeField]
     TextAsset[] allCsv;
@@ -19,6 +23,19 @@ public class GeneratePath : MonoBehaviour
 
     [SerializeField]
     Material material;
+
+    [ReadOnly]
+    public NativeArray<Vector3> startPos;
+    [ReadOnly]
+    public NativeArray<Vector3> endPos;
+    public TransformAccessArray transformsAccessArray;
+
+    private List<List<string>> nameList = new List<List<string>>();
+    private List<Vector3> startPosTempList = new List<Vector3>();
+    private List<Vector3> endPosTempList = new List<Vector3>();
+    private List<string> startDate = new List<string>();
+    private List<string> endDate = new List<string>();
+    int dataCount = 0;
 
 
     /// <summary>
@@ -56,74 +73,56 @@ public class GeneratePath : MonoBehaviour
     private void Awake()
     {
         pathDic = new Dictionary<string, List<PathObj>>();
+        
     }
 
     void Start()
     {
-        for (int i = 0; i < allCsv.Length; i++)
+        ProcessCSVFiles("Assets/Resources/data");
+        int idx = 0;
+        var transforms = new Transform[dataCount];
+        for(int i = 0; i < nameList.Count; i++)
         {
             List<PathObj> tmpPaths = new List<PathObj>();
-
-            string[][] csvFile = CSVReader.CSVReadAsset(allCsv[i], 1);
-            //新建一个子物体名称为csvFile
-            string trackNumber = allCsv[i].name;
-            GameObject childObject = new GameObject(allCsv[i].name);
+            string trackNumber = nameList[i][0];
+            GameObject childObject = new GameObject(nameList[i][0]);
             childObject.transform.parent = this.transform;
             Material originalMaterial = material;
             Material cubeMaterialInstance = Instantiate(originalMaterial);
             cubeMaterialInstance.enableInstancing = true;
             cubeMaterialInstance.color = colors[i];
-
-            for (int j = 0; j < csvFile.Length - 2; j++)
+            for(int j = 0; j < nameList[i].Count; j++)
             {
-                float lat = float.Parse(csvFile[j][1]);
-                float lon = float.Parse(csvFile[j][2]);
-                float lat2 = float.Parse(csvFile[j + 1][1]);
-                float lon2 = float.Parse(csvFile[j + 1][2]);
-                string date = csvFile[j][3];
-                string date2 = csvFile[j + 1][3];
-                Vector3 start = STCBox.Convert(lat, lon, date);
-                Vector3 end = STCBox.Convert(lat2, lon2, date2);
-                GameObject cubePath =  CreateCube(
-                    STCBox.Convert(lat, lon, date),
-                    STCBox.Convert(lat2, lon2, date2),
-                    0.2f,
+                Vector3 start = startPosTempList[idx];
+                Vector3 end = endPosTempList[idx];
+                GameObject cubePath = CreateCube(
+                    STCBox.instance.Convert(start.x,start.z, startDate[idx]),
+                    STCBox.instance.Convert(end.x, end.z, endDate[idx]), 
+                    0.2f, 
                     childObject.transform
-                    );
+                );
                 cubePath.AddComponent<PathObj>();
-                cubePath.GetComponent<PathObj>().SetInit(lat, lon, lat2, lon2, date, date2, start, end, trackNumber, colors[i]);
+                cubePath.GetComponent<PathObj>().SetInit(
+                    startPos[idx].x, startPos[idx].z,
+                    endPos[idx].x, endPos[idx].z, 
+                    startDate[idx], endDate[idx],
+                    start, end, trackNumber, colors[i]
+                );
                 cubePath.GetComponent<Renderer>().sharedMaterial = cubeMaterialInstance;
-                cubePath.tag = "Path";
-                /*cubePath.GetComponent<PathObj>().trackName = trackNumber;
-                //cubePath.GetComponent<PathObj>().start = start;
-                //cubePath.GetComponent<PathObj>().end = end;
-                //cubePath.GetComponent<PathObj>().startLatitude = lat;
-                //cubePath.GetComponent<PathObj>().startLongitude = lon;
-                //cubePath.GetComponent<PathObj>().startDateString = date;
-                //cubePath.GetComponent<PathObj>().endLatitude = lat2;
-                //cubePath.GetComponent<PathObj>().endLongitude = lon2;
-                //cubePath.GetComponent<PathObj>().endDateString = date2;
-                //cubePath.GetComponent<PathObj>().color = Color.yellow;
-                //在当前物体下面生成一个球体,球体的直径与柱体的直径保持一致,并作为柱体的子物体
-                //GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                //float diameter = cubePath.transform.localScale.x; // 柱体的直径
-                //sphere.transform.localScale = Vector3.one * diameter;
-                //sphere.transform.SetParent(cubePath.transform);
-                //float spherePosY = cubePath.transform.localScale.y;
-                //sphere.transform.localPosition = new Vector3(0f, spherePosY, 0f);
-                //sphere.GetComponent<MeshRenderer>().material.color = Color.red;
-                allPath.Add(cubePath.GetComponent<PathObj>());*/
+                cubePath.GetComponent<MeshRenderer>().shadowCastingMode = ShadowCastingMode.Off;
+                cubePath.GetComponent<MeshRenderer>().receiveShadows = false;
+                cubePath.GetComponent<Collider>().isTrigger = true;
                 tmpPaths.Add(cubePath.GetComponent<PathObj>());
+                cubePath.tag = "Path";
+                //Destroy(cubePath.GetComponent<Collider>());
+                transforms[idx] = cubePath.transform;
+                idx++;
             }
             pathDic.Add(trackNumber, tmpPaths);
         }
-        Debug.Log(pathDic.Count);
+        transformsAccessArray = new TransformAccessArray(transforms);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-    }
 
     GameObject CreateCylinder(Vector3 startPoint, Vector3 endPoint, float radius, Transform parent)
     {
@@ -151,12 +150,79 @@ public class GeneratePath : MonoBehaviour
         // 计算长方体的旋转角度
         Quaternion rotation = Quaternion.FromToRotation(Vector3.up, endPoint - startPoint);
         GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //cube.GetComponent<Collider>().enabled = false;
+        //Destroy(cube.GetComponent<Collider>());
         // 设置长方体的位置、旋转和大小
         cube.transform.position = center;
         cube.transform.rotation = rotation;
         cube.transform.localScale = new Vector3(size, length, size);
         cube.transform.parent = parent;
         return cube;
+    }
+
+
+    public void ProcessCSVFiles(string csvFolderPath)
+    {
+        string[] csvFiles = Directory.GetFiles(csvFolderPath, "*.csv");
+
+        float totalLatitude = 0f;
+        float totalLongitude = 0f;
+        STCBox.instance.oriDateTimeString = "06/02/2013 00:00"; 
+        //STCBox.instance.oriDate = DateTime.ParseExact(STCBox.instance.oriDateTimeString, "MM/dd/yyyy H:mm");
+        foreach (string filePath in csvFiles)
+        {
+            string[] lines = File.ReadAllLines(filePath);
+            List<string> tmpNameList = new List<string>();
+            string tkName = Path.GetFileNameWithoutExtension(filePath);
+            for (int i = 1; i < lines.Length - 2; i++) // 跳过标题行
+            {
+                string[] startValues = lines[i].Split(',');
+                string[] endValues = lines[i+1].Split(',');
+                
+                if (startValues.Length >= 3)
+                {
+                    if (float.TryParse(startValues[1], out float latitude) && 
+                        float.TryParse(startValues[2], out float longitude))
+                    {
+                        startPosTempList.Add(STCBox.instance.OriData2Vector3(startValues[1], startValues[2], startValues[3]));
+                        endPosTempList.Add(STCBox.instance.OriData2Vector3(endValues[1], endValues[2], endValues[3]));
+                        startDate.Add(startValues[3]);
+                        endDate.Add(endValues[3]);
+                        tmpNameList.Add(tkName);
+                        totalLatitude += latitude;
+                        totalLongitude += longitude;
+                        dataCount++;
+                    }
+                }
+            }
+            nameList.Add(tmpNameList);
+        }
+        startPos =  new NativeArray<Vector3>(startPosTempList.ToArray(), Allocator.Persistent);
+        endPos = new NativeArray<Vector3>(endPosTempList.ToArray(), Allocator.Persistent);
+        float averageLatitude = 0;
+        float averageLongitude = 0;
+        if (dataCount > 0)
+        {
+            averageLatitude = totalLatitude / dataCount;
+            averageLongitude = totalLongitude / dataCount;
+
+            Debug.Log("Average Latitude: " + averageLatitude);
+            Debug.Log("Average Longitude: " + averageLongitude);
+            Debug.Log("All data count: " + dataCount + ",Length of pos: " + startPos.Length);
+            //Debug.Log()
+            STCBox.instance.oriLatitude = averageLatitude;
+            STCBox.instance.oriLongitude = averageLongitude;
+        }
+        else
+        {
+            Debug.Log("No valid data found in CSV files.");
+        }
+
+    }
+
+    private void OnDestroy()
+    {
+        transformsAccessArray.Dispose();
     }
 
 }

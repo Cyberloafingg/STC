@@ -75,8 +75,8 @@ public class PathObj : MonoBehaviour
         this.trackName = trackName;
         this.color = color;
 
-        startDate = DateTime.ParseExact(startDateString.Substring(0, startDateString.Length - 1), "dd/MM/yyyy H:mm", null);
-        endDate = DateTime.ParseExact(endDateString.Substring(0, endDateString.Length - 1), "dd/MM/yyyy H:mm", null);
+        startDate = DateTime.ParseExact(startDateString, "dd/MM/yyyy H:mm", null);
+        endDate = DateTime.ParseExact(endDateString, "dd/MM/yyyy H:mm", null);
         GetTimeType(startDate,ref colorByTime,ref timeType);
     }
     public void GetTimeType(DateTime startDate,ref Color colorByTime, ref TimeType timeType)
@@ -103,6 +103,5 @@ public class PathObj : MonoBehaviour
             colorByTime = colorByTimeList[3];
         }
     }
-
 
 }

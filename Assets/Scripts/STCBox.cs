@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using UnityEngine;
 
 public class STCBox : MonoBehaviour
@@ -8,6 +9,9 @@ public class STCBox : MonoBehaviour
     public string oriDateTimeString;  // 原始时间
     [SerializeField]
     public DateTime oriDate;   // 原始时间的秒数
+    public DateTime nowDate;   // 当前时间的秒数
+
+    CultureInfo englishCulture = new CultureInfo("en-US");
 
     /// <summary>
     /// x轴缩放比例
@@ -19,10 +23,24 @@ public class STCBox : MonoBehaviour
     [SerializeField]
     public float zScale = 0.01f;
 
+    public static STCBox instance;
+
+    public void Awake()
+    {
+        if(instance == null)
+        {
+            instance = this;
+            oriDate = DateTime.ParseExact(oriDateTimeString, "dd/MM/yyyy H:mm", null);
+        }
+    }
+
 
     private void Start()
     {
         oriDate = DateTime.ParseExact(oriDateTimeString, "dd/MM/yyyy H:mm", null);
+        Debug.Log(oriDate);
+        nowDate = oriDate;
+
     }
 
     /// <summary>
@@ -40,12 +58,36 @@ public class STCBox : MonoBehaviour
     }
 
 
+
     float Data2Second(string dateTimeString)
     {
-        DateTime dateTime = DateTime.ParseExact(dateTimeString.Substring(0,dateTimeString.Length-1), "dd/MM/yyyy H:mm", null);
+        DateTime dateTime = DateTime.ParseExact(dateTimeString, "dd/MM/yyyy H:mm", null);
         float minute = (float)(dateTime - oriDate).TotalMinutes;
-        //Debug.Log("minutes: " + minute);
         return minute;
+    }
+
+    public DateTime DateString2Date(string dataString)
+    {
+        return DateTime.ParseExact(dataString, "dd/MM/yyyy H:mm", null);
+    }
+
+    public float DateString2Minute(string dataString)
+    {
+        DateTime dateTime = DateString2Date(dataString);
+        return (float)(dateTime - oriDate).TotalMinutes;
+    }
+
+    public float Date2Minute(DateTime dateTime)
+    {
+        return (float)(dateTime - oriDate).TotalMinutes;
+    }
+
+    public Vector3 OriData2Vector3(string lat, string lon, string dateString)
+    {
+        float x = float.Parse(lat);
+        float z = float.Parse(lon);
+        float y = DateString2Minute(dateString);
+        return new Vector3(x, y, z);
     }
 
 }
