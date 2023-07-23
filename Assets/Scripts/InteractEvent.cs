@@ -1,37 +1,43 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 using UnityEngine.UI;
 
 public class InteractEvent : MonoBehaviour
 {
-    public RectTransform tip;
-    public int length;
+    public RectTransform tipUI;
+    public Vector3 tipUIOffset;
+    public int rayLength;
+
+    Image image;
+    TMP_Text tipText;
+
+    void Start()
+    {
+        image = tipUI.gameObject.GetComponent<Image>();
+        tipText = image.gameObject.GetComponentInChildren<TMP_Text>();
+        image.enabled = false;
+        tipText.enabled = false;
+    }
+
 
     void Update()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
-        bool raycast = Physics.Raycast(ray, out hit, length);
-        if (raycast && hit.collider.gameObject.tag == "Path")
+        bool raycast = Physics.Raycast(ray, out hit, rayLength);
+        if(raycast && hit.collider.gameObject.tag == "Path")
         {
-            GameObject go = hit.collider.gameObject;
-            tip.gameObject.SetActive(true);
-            tip.GetComponentInChildren<Text>().text = go.GetComponent<PathObj>().trackName+ "  " + go.GetComponent<PathObj>().startDateString;
-            //FollowMouse();
+            tipUI.position = Input.mousePosition + tipUIOffset;
+            PathObj pathObj= hit.collider.gameObject.GetComponent<PathObj>();
+            tipText.text = pathObj.trackName + " " + pathObj.startDateString;
+            image.enabled = true;
+            tipText.enabled = true;
         }
         else
         {
-            tip.gameObject.SetActive(false);
-        }
-        //Debug.DrawLine(ray.origin, ray.origin + ray.direction * length, Color.black, 1.0f);
-    }
-
-    void FollowMouse()
-    {
-        Vector3 mousePosition = Input.mousePosition;
-        RectTransformUtility.ScreenPointToWorldPointInRectangle(tip, mousePosition, Camera.main, out Vector3 worldPosition);
-        tip.position = worldPosition;
+            image.enabled = false;
+            tipText.enabled = false;
+        }        
     }
 
 }

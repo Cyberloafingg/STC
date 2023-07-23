@@ -62,7 +62,7 @@ public class STCBox : MonoBehaviour
     float Data2Second(string dateTimeString)
     {
         DateTime dateTime = DateTime.ParseExact(dateTimeString, "dd/MM/yyyy H:mm", null);
-        float minute = (float)(dateTime - oriDate).TotalMinutes;
+        float minute = (float)(oriDate - dateTime).TotalMinutes;
         return minute;
     }
 
@@ -74,12 +74,12 @@ public class STCBox : MonoBehaviour
     public float DateString2Minute(string dataString)
     {
         DateTime dateTime = DateString2Date(dataString);
-        return (float)(dateTime - oriDate).TotalMinutes;
+        return (float)(oriDate - dateTime).TotalMinutes;
     }
 
     public float Date2Minute(DateTime dateTime)
     {
-        return (float)(dateTime - oriDate).TotalMinutes;
+        return (float)(oriDate - dateTime).TotalMinutes;
     }
 
     public Vector3 OriData2Vector3(string lat, string lon, string dateString)

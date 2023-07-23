@@ -47,6 +47,12 @@ public class VisualLabel : MonoBehaviour
 
     float dif = 5.0f;
 
+    bool isMoveLabel = false;
+
+    public GameObject markerPrefab;
+
+    GameObject markerTmp;
+
 
     // 设置需要控制的变量
     public int controlledVariable = 0;
@@ -142,7 +148,7 @@ public class VisualLabel : MonoBehaviour
             for (int j = 0; j < labelTextList[i].Count; j++)
             {
                 float tmp = dif * j / STCBox.instance.yScale;
-                DateTime labelDate = STCBox.instance.nowDate.AddMinutes(tmp);
+                DateTime labelDate = STCBox.instance.nowDate.AddMinutes(-tmp);
                 labelTextList[i][j].text = Date2String(labelDate);
             }
         }
@@ -150,10 +156,11 @@ public class VisualLabel : MonoBehaviour
     void PointerMove()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-
         RaycastHit hit;
-
+        if(Input.GetMouseButtonUp(0))
+        {
+            isMoveLabel = false;
+        }
 
         if (Physics.Raycast(ray, out hit))
         {
@@ -173,12 +180,13 @@ public class VisualLabel : MonoBehaviour
                     Vector2 outLocalPos = new Vector2(pointerList[i].rectTransform.anchoredPosition.x, pointerLocalPos.y + 2.5f);
                     // 设置指针的位置与鼠标指针的局部坐标保持一致
                     pointer.rectTransform.anchoredPosition = outLocalPos;
-                    pointer.text = Date2String(STCBox.instance.nowDate.AddMinutes((pointerList[i].rectTransform.anchoredPosition.y + 37.5f) / STCBox.instance.yScale));
+                    pointer.text = Date2String(STCBox.instance.nowDate.AddMinutes(-(pointerList[i].rectTransform.anchoredPosition.y + 37.5f) / STCBox.instance.yScale));
                 }
                 /////////////////////////////////////////////
                 // 当鼠标按下左键时
                 if (Input.GetMouseButtonDown(0))
                 {
+                    isMoveLabel = true;
                     // 记录鼠标当前位置
                     lastMousePosition = Input.mousePosition;
                 }
@@ -186,18 +194,19 @@ public class VisualLabel : MonoBehaviour
                 else if (Input.GetMouseButton(0))
                 {
                     // 计算鼠标在Y轴上的移动距离
+                    isMoveLabel = true;
                     float deltaY = Input.mousePosition.y - lastMousePosition.y;
 
                     // 根据移动距离来改变控制的变量
                     if (deltaY < 0)
                     {
-                        STCBox.instance.nowDate = STCBox.instance.nowDate.AddMinutes(20);
+                        STCBox.instance.nowDate = STCBox.instance.nowDate.AddMinutes(-20);
                         UpdatePath.UpdateEveryPath();
 
                     }
                     else if (deltaY > 0)
                     {
-                        STCBox.instance.nowDate = STCBox.instance.nowDate.AddMinutes(-20);
+                        STCBox.instance.nowDate = STCBox.instance.nowDate.AddMinutes(20);
                         UpdatePath.UpdateEveryPath();
                     }
 
@@ -209,16 +218,19 @@ public class VisualLabel : MonoBehaviour
             }
             else if(hitObject.name == "Map")
             {
-                
                 if (Input.GetMouseButtonDown(0))
                 {
                     dragPlane.Raycast(ray, out float distance);
                     Vector3 hitPoint = ray.GetPoint(distance);
                     offset = allPathTransform.position - hitPoint;
+
+                    Vector3 clickPosition = hit.point;
+                    //markerTmp = Instantiate(markerPrefab, clickPosition, Quaternion.identity);
                 }
                 // 当鼠标拖拽时
-                else if (Input.GetMouseButton(0))
+                else if (Input.GetMouseButton(0) && !isMoveLabel)
                 {
+                    //Destroy(markerTmp);
                     dragPlane.Raycast(ray, out float distance);
                     Vector3 hitPoint = ray.GetPoint(distance);
                     allPathTransform.localPosition = new Vector3(
@@ -226,8 +238,8 @@ public class VisualLabel : MonoBehaviour
                         allPathTransform.localPosition.y, 
                         hitPoint.z + offset.z
                     );
+                    UpdatePath.ScrollByXZAxis();
                 }
-                UpdatePath.ScrollByXZAxis();
             }
         }
     }

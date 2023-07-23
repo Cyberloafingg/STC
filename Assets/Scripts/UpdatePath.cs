@@ -20,8 +20,8 @@ public class UpdatePath : MonoBehaviour
 
     bool isColorByTimeOn = false;
     public bool isAutoMoveOn = false;
-    int tmp = 0;
-    int add = 10;
+    int autoMoveTmp = 0;
+    int autoMoveAdd = 10;
 
     private string lastClickedTag = "";
     private float lastClickTime = 0f;
@@ -44,7 +44,7 @@ public class UpdatePath : MonoBehaviour
         {
             ColorByTime();
         }
-        if(Input.GetKeyDown(KeyCode.M))
+        if(isAutoMoveOn)
         {
             AutoMove();
         }
@@ -82,12 +82,12 @@ public class UpdatePath : MonoBehaviour
 
     public void AutoMove()
     {
-        tmp += 10;
-        if (tmp % 6000 == 0)
+        autoMoveTmp += 10;
+        if (autoMoveTmp % 6000 == 0)
         {
-            add = -add;
+            autoMoveAdd = -autoMoveAdd;
         }
-        STCBox.instance.nowDate = STCBox.instance.nowDate.AddMinutes(add);
+        STCBox.instance.nowDate = STCBox.instance.nowDate.AddMinutes(-autoMoveAdd);
         UpdateEveryPath();
     }
 

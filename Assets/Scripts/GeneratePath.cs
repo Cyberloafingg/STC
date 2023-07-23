@@ -13,8 +13,6 @@ public class GeneratePath : MonoBehaviour
     //读取csv文件，返回一个PathObj的List
     //遍历List，生成路径
     //这些路径应该都是在同一个父级物体下面
-    
-
     [SerializeField]
     TextAsset[] allCsv;
 
@@ -23,6 +21,9 @@ public class GeneratePath : MonoBehaviour
 
     [SerializeField]
     Material material;
+
+    [SerializeField]
+    string pathName;
 
     [ReadOnly]
     public NativeArray<Vector3> startPos;
@@ -36,7 +37,6 @@ public class GeneratePath : MonoBehaviour
     private List<string> startDate = new List<string>();
     private List<string> endDate = new List<string>();
     int dataCount = 0;
-
 
     /// <summary>
     /// 颜色配置
@@ -78,7 +78,7 @@ public class GeneratePath : MonoBehaviour
 
     void Start()
     {
-        ProcessCSVFiles("Assets/Resources/data");
+        ProcessCSVFiles(pathName);
         int idx = 0;
         var transforms = new Transform[dataCount];
         for(int i = 0; i < nameList.Count; i++)
@@ -163,11 +163,15 @@ public class GeneratePath : MonoBehaviour
 
     public void ProcessCSVFiles(string csvFolderPath)
     {
+        csvFolderPath = PlayerPrefs.GetString("SelectedFolderPath");
+        if (csvFolderPath == null) {
+            csvFolderPath = "Assets/Resources/data";
+        }
         string[] csvFiles = Directory.GetFiles(csvFolderPath, "*.csv");
 
         float totalLatitude = 0f;
         float totalLongitude = 0f;
-        STCBox.instance.oriDateTimeString = "06/02/2013 00:00"; 
+        STCBox.instance.oriDateTimeString = "12/02/2013 00:00"; 
         //STCBox.instance.oriDate = DateTime.ParseExact(STCBox.instance.oriDateTimeString, "MM/dd/yyyy H:mm");
         foreach (string filePath in csvFiles)
         {
@@ -209,7 +213,6 @@ public class GeneratePath : MonoBehaviour
             Debug.Log("Average Latitude: " + averageLatitude);
             Debug.Log("Average Longitude: " + averageLongitude);
             Debug.Log("All data count: " + dataCount + ",Length of pos: " + startPos.Length);
-            //Debug.Log()
             STCBox.instance.oriLatitude = averageLatitude;
             STCBox.instance.oriLongitude = averageLongitude;
         }
