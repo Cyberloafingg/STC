@@ -48,7 +48,7 @@ public class PathObj : MonoBehaviour
         new Color(1f, 0f, 0f),       // 红色
         new Color(0f, 1f, 0f),       // 绿色
         new Color(0f, 0f, 1f),       // 蓝色
-        new Color(1f, 1f, 0f),       // 黄色
+        new Color(0f, 0f, 0f),       // 黑色
     };
 
 

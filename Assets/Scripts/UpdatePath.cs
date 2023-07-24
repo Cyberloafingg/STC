@@ -13,21 +13,29 @@ public class UpdatePath : MonoBehaviour
     private JobHandle m_JobHandle;
     private PathUpdateJob m_Job;
 
-
+    /// <summary>
+    /// 获取生成的路径数据
+    /// </summary>
     GeneratePath generatePath;
-    [SerializeField]
     Dictionary<string, List<PathObj>> pathDic;
 
-    bool isColorByTimeOn = false;
-    public bool isAutoMoveOn = false;
-    int autoMoveTmp = 0;
-    int autoMoveAdd = 10;
-
-    private string lastClickedTag = "";
-    private float lastClickTime = 0f;
+    public bool isColorByTimeOn = false; // 是否按照时间变色
+    private bool isAutoMoveOn = false; // 是否开启自由移动
+    private int autoMoveTmp = 0; // 自由移动的临时变量
+    private int autoMoveAdd = 10; // 自由移动的增量
+    private string lastClickedTag = ""; // 上一次点击的标签
+    private float lastClickTime = 0f; // 上一次点击的时间
     private float doubleClickInterval = 0.3f; // 双击间隔时间，单位为秒
     private string attentionPathName = ""; // 关注的路径名称
-    bool isAttentionOnePath = false; // 是否关注某一条路径
+    private bool isAttentionOnePath = false; // 是否关注某一条路径
+
+
+    [Tooltip("缩放XZ轴的速度"), SerializeField, Range(10,50)]
+    int scrollXZSpeed = 15;
+
+    [Tooltip("缩放Y轴的速度"), SerializeField, Range(0.001f,0.01f)]
+    float scrollYSpeed = 0.001f;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -56,8 +64,8 @@ public class UpdatePath : MonoBehaviour
         float scrollDelta = Input.GetAxis("Mouse ScrollWheel");
         if (scrollDelta != 0)
         {
-            STCBox.instance.xScale += scrollDelta * 10f;
-            STCBox.instance.zScale += scrollDelta * 10f;
+            STCBox.instance.xScale += scrollDelta * scrollXZSpeed;
+            STCBox.instance.zScale += scrollDelta * scrollXZSpeed;
         }
         UpdateEveryPath();
     }
@@ -70,7 +78,7 @@ public class UpdatePath : MonoBehaviour
         float scrollDelta = Input.GetAxis("Mouse ScrollWheel");
         if (scrollDelta != 0)
         {
-            STCBox.instance.yScale += scrollDelta * 0.001f;
+            STCBox.instance.yScale += scrollDelta * scrollYSpeed;
         }
         UpdateEveryPath();
     }
@@ -89,6 +97,18 @@ public class UpdatePath : MonoBehaviour
         }
         STCBox.instance.nowDate = STCBox.instance.nowDate.AddMinutes(-autoMoveAdd);
         UpdateEveryPath();
+    }
+
+    public void AutoMoveOnOrOff()
+    {
+        if(isAutoMoveOn)
+        {
+            isAutoMoveOn = false;
+        }
+        else
+        {
+            isAutoMoveOn = true;
+        }
     }
 
     /// <summary>
@@ -154,13 +174,9 @@ public class UpdatePath : MonoBehaviour
             Quaternion rotation = Quaternion.FromToRotation(Vector3.up, endPosNew - startPosNew);
             transform.localPosition = center;
             transform.localRotation = rotation;
-            transform.localScale = new Vector3(0.2f, height, 0.2f);
+            transform.localScale = new Vector3(0.2f, height/2f, 0.2f);
         }
     }
-
-
-
-
 
     void ChangeColor()
     {
@@ -237,7 +253,7 @@ public class UpdatePath : MonoBehaviour
         }
     }
 
-    void ColorByTime()
+    public void ColorByTime()
     {
         if (!isColorByTimeOn)
         {

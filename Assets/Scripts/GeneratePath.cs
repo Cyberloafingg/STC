@@ -10,33 +10,43 @@ using UnityEngine.Jobs;
 
 public class GeneratePath : MonoBehaviour
 {
-    //读取csv文件，返回一个PathObj的List
-    //遍历List，生成路径
-    //这些路径应该都是在同一个父级物体下面
-    [SerializeField]
-    TextAsset[] allCsv;
 
-    [SerializeField]
-    public Dictionary<string, List<PathObj>> pathDic;
 
+    /// <summary>
+    /// 生成的路径所使用的材质
+    /// </summary>
+    [Tooltip("生成的路径所使用的材质")]
     [SerializeField]
     Material material;
 
+    [Tooltip("所打开的路径")]
     [SerializeField]
     string pathName;
 
+    /// <summary>
+    /// ECS部分的数据
+    /// </summary>
     [ReadOnly]
     public NativeArray<Vector3> startPos;
     [ReadOnly]
     public NativeArray<Vector3> endPos;
     public TransformAccessArray transformsAccessArray;
 
+    /// <summary>
+    /// 一些记录数据
+    /// </summary>
     private List<List<string>> nameList = new List<List<string>>();
     private List<Vector3> startPosTempList = new List<Vector3>();
     private List<Vector3> endPosTempList = new List<Vector3>();
     private List<string> startDate = new List<string>();
     private List<string> endDate = new List<string>();
     int dataCount = 0;
+
+    /// <summary>
+    /// 存储所有的路径，按照名称存储
+    /// </summary>
+    [SerializeField]
+    public Dictionary<string, List<PathObj>> pathDic;
 
     /// <summary>
     /// 颜色配置
@@ -95,7 +105,7 @@ public class GeneratePath : MonoBehaviour
             {
                 Vector3 start = startPosTempList[idx];
                 Vector3 end = endPosTempList[idx];
-                GameObject cubePath = CreateCube(
+                GameObject cubePath = CreateCylinder(
                     STCBox.instance.Convert(start.x,start.z, startDate[idx]),
                     STCBox.instance.Convert(end.x, end.z, endDate[idx]), 
                     0.2f, 
@@ -123,7 +133,14 @@ public class GeneratePath : MonoBehaviour
         transformsAccessArray = new TransformAccessArray(transforms);
     }
 
-
+    /// <summary>
+    /// 生成圆柱体路径
+    /// </summary>
+    /// <param name="startPoint"></param>
+    /// <param name="endPoint"></param>
+    /// <param name="radius"></param>
+    /// <param name="parent"></param>
+    /// <returns></returns>
     GameObject CreateCylinder(Vector3 startPoint, Vector3 endPoint, float radius, Transform parent)
     {
         // 计算柱体的高度
@@ -141,6 +158,14 @@ public class GeneratePath : MonoBehaviour
         return cylinder;
     }
 
+    /// <summary>
+    /// 生成立方体路径
+    /// </summary>
+    /// <param name="startPoint"></param>
+    /// <param name="endPoint"></param>
+    /// <param name="size"></param>
+    /// <param name="parent"></param>
+    /// <returns></returns>
     GameObject CreateCube(Vector3 startPoint, Vector3 endPoint, float size, Transform parent)
     {
         // 计算长方体的长度
@@ -150,8 +175,6 @@ public class GeneratePath : MonoBehaviour
         // 计算长方体的旋转角度
         Quaternion rotation = Quaternion.FromToRotation(Vector3.up, endPoint - startPoint);
         GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        //cube.GetComponent<Collider>().enabled = false;
-        //Destroy(cube.GetComponent<Collider>());
         // 设置长方体的位置、旋转和大小
         cube.transform.position = center;
         cube.transform.rotation = rotation;
@@ -160,7 +183,10 @@ public class GeneratePath : MonoBehaviour
         return cube;
     }
 
-
+    /// <summary>
+    /// 解析CSV
+    /// </summary>
+    /// <param name="csvFolderPath"></param>
     public void ProcessCSVFiles(string csvFolderPath)
     {
         csvFolderPath = PlayerPrefs.GetString("SelectedFolderPath");

@@ -49,10 +49,6 @@ public class VisualLabel : MonoBehaviour
 
     bool isMoveLabel = false;
 
-    public GameObject markerPrefab;
-
-    GameObject markerTmp;
-
 
     // 设置需要控制的变量
     public int controlledVariable = 0;
@@ -220,17 +216,21 @@ public class VisualLabel : MonoBehaviour
             {
                 if (Input.GetMouseButtonDown(0))
                 {
-                    dragPlane.Raycast(ray, out float distance);
-                    Vector3 hitPoint = ray.GetPoint(distance);
-                    offset = allPathTransform.position - hitPoint;
-
-                    Vector3 clickPosition = hit.point;
-                    //markerTmp = Instantiate(markerPrefab, clickPosition, Quaternion.identity);
+                    if(SettingPanel.instance.isMarking)
+                    {
+                        Vector3 clickPosition = hit.point;
+                        SettingPanel.instance.Marking(clickPosition);
+                    }
+                    else
+                    {
+                        dragPlane.Raycast(ray, out float distance);
+                        Vector3 hitPoint = ray.GetPoint(distance);
+                        offset = allPathTransform.position - hitPoint;
+                    }
                 }
                 // 当鼠标拖拽时
-                else if (Input.GetMouseButton(0) && !isMoveLabel)
+                else if (Input.GetMouseButton(0) && !isMoveLabel && !SettingPanel.instance.isMarking)
                 {
-                    //Destroy(markerTmp);
                     dragPlane.Raycast(ray, out float distance);
                     Vector3 hitPoint = ray.GetPoint(distance);
                     allPathTransform.localPosition = new Vector3(
@@ -238,8 +238,9 @@ public class VisualLabel : MonoBehaviour
                         allPathTransform.localPosition.y, 
                         hitPoint.z + offset.z
                     );
-                    UpdatePath.ScrollByXZAxis();
+                    
                 }
+                UpdatePath.ScrollByXZAxis();
             }
         }
     }

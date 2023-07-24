@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,12 +6,29 @@ using UnityEngine.SceneManagement;
 
 public class SettingPanel : MonoBehaviour
 {
+    public UpdatePath UpdatePath;
+
+    public static SettingPanel instance;
+
+    public bool isMarking;
+
+    List<GameObject> markerList = new List<GameObject>();
+
+    public GameObject markerPrefab;
     // Start is called before the first frame update
     void Start()
     {
         
     }
 
+
+    public void Awake()
+    {
+        if (instance == null)
+        {
+            instance = this;
+        }
+    }
     // Update is called once per frame
     void Update()
     {
@@ -19,7 +37,40 @@ public class SettingPanel : MonoBehaviour
 
     public void ReloadScene()
     {
-        // 加载当前场景（即重新加载）
         SceneManager.LoadScene("BeginScene");
+    }
+
+    public void ColorByTime()
+    {
+        UpdatePath.ColorByTime();
+    }
+
+    public void TurnToMarking()
+    {
+        isMarking = true;
+    }
+
+    public void TurnToNormal()
+    {
+        isMarking = false;
+    }
+
+    public void ClearAllMarker()
+    {
+        for(int i = 0; i < markerList.Count; i++)
+        {
+            Destroy(markerList[i]);
+        }
+    }
+
+    public void AutoMove()
+    {
+        UpdatePath.AutoMoveOnOrOff();
+    }    
+
+    public void Marking(Vector3 clickPosition)
+    {
+        GameObject markerTmp = Instantiate(markerPrefab, clickPosition, Quaternion.identity);
+        markerList.Add(markerTmp);
     }
 }
