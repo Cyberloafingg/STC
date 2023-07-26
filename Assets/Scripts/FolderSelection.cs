@@ -10,6 +10,13 @@ public class FolderSelection : MonoBehaviour
 
     public string targetSceneName; // 在Inspector面板中指定要切换到的场景名称
 
+    CanvasGroup canvasGroup;
+
+    private void Start()
+    {
+        canvasGroup = GetComponent<CanvasGroup>();
+    }
+
     public void OpenFolderDialog()
     {
         OpenFileName ofn = new OpenFileName();
@@ -28,7 +35,7 @@ public class FolderSelection : MonoBehaviour
         //默认路径
         ofn.initialDir = path;
 
-        ofn.title = "选择需要替换的图片";
+        ofn.title = "选择文件夹";
 
         ofn.defExt = "JPG";//显示文件的类型
                            //注意 一下项目不一定要全选 但是0x00000008项不要缺少
@@ -53,15 +60,19 @@ public class FolderSelection : MonoBehaviour
 
     private IEnumerator LoadSceneAsync()
     {
+        float targetLoadTime = 1.0f; // 目标加载时间为2秒钟
+        float timer = 0.0f; // 用于计时的变量
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(targetSceneName);
+        asyncLoad.allowSceneActivation = false;
 
-        while (!asyncLoad.isDone)
+        while (!asyncLoad.isDone && timer < targetLoadTime)
         {
-            // 这里可以显示加载界面或进度条
-            float progress = Mathf.Clamp01(asyncLoad.progress / 0.9f);
-            Debug.Log("Loading progress: " + (progress * 100) + "%");
-
+            canvasGroup.alpha = 1 - timer / targetLoadTime;
+            timer += Time.deltaTime; // 使用Time.deltaTime来获取上一帧到当前帧的时间间隔
+            Debug.Log("Timer: " + timer);
             yield return null;
         }
+        // 确保加载完成
+        asyncLoad.allowSceneActivation = true;
     }
 }
