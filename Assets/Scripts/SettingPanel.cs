@@ -14,11 +14,14 @@ public class SettingPanel : MonoBehaviour
 
     List<GameObject> markerList = new List<GameObject>();
 
+    Transform markerParent;
+
+
     public GameObject markerPrefab;
     // Start is called before the first frame update
     void Start()
     {
-        
+        markerParent = STCBox.instance.GetComponentInChildren<UpdatePath>().transform;
     }
 
 
@@ -70,7 +73,8 @@ public class SettingPanel : MonoBehaviour
 
     public void Marking(Vector3 clickPosition)
     {
-        GameObject markerTmp = Instantiate(markerPrefab, clickPosition, Quaternion.identity);
+        GameObject markerTmp = Instantiate(markerPrefab, clickPosition, Quaternion.identity,markerParent);
+        
         markerList.Add(markerTmp);
     }
 }

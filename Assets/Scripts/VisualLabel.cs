@@ -41,8 +41,6 @@ public class VisualLabel : MonoBehaviour
 
     private Plane dragPlane;
 
-    public float moveXZSpeed = 0.5f;
-
     Vector3 offset;
 
     float dif = 5.0f;
@@ -84,7 +82,6 @@ public class VisualLabel : MonoBehaviour
     }
 
     // Update is called once per frame
-
     void Update()
     {
         DisableBackFacingToCamera();

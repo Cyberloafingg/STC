@@ -7,6 +7,8 @@ using System.IO;
 using Unity.Collections;
 using Unity.Core;
 using UnityEngine.Jobs;
+using UnityEngine.XR;
+using UnityEngine.XR.Management;
 
 public class GeneratePath : MonoBehaviour
 {
@@ -79,7 +81,7 @@ public class GeneratePath : MonoBehaviour
         new Color(0.8f, 0.8f, 0.2f)// Éî»ÆÉ«
     };
 
-
+    XRLoader m_SelectedXRLoader;
     private void Awake()
     {
         pathDic = new Dictionary<string, List<PathObj>>();
@@ -88,6 +90,10 @@ public class GeneratePath : MonoBehaviour
 
     void Start()
     {
+        m_SelectedXRLoader = XRGeneralSettings.Instance.Manager.activeLoaders[0];
+        m_SelectedXRLoader.Stop();
+        m_SelectedXRLoader.Deinitialize();
+
         ProcessCSVFiles(pathName);
         int idx = 0;
         var transforms = new Transform[dataCount];

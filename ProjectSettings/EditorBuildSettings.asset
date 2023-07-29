@@ -12,6 +12,7 @@ EditorBuildSettings:
     path: Assets/Scenes/STCDesktop.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   m_configObjects:
+    Unity.XR.OpenVR.Settings: {fileID: 11400000, guid: aa5a104c6e7cf0241a72cf41a9dda269, type: 2}
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: 3fd121c395ea8aa43b6a4b51cdf77692, type: 2}
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: cd6c5787036cdab428edd79a44c5545e, type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: bdfc2bb4a836d0745a12e097f01a2cd8, type: 2}

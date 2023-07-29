@@ -1,17 +1,5 @@
 {
   "dependencies": {
-    "com.htc.upm.vive.openxr": {
-      "version": "https://github.com/ViveSoftware/VIVE-OpenXR-PC.git?path=com.htc.upm.vive.openxr",
-      "depth": 0,
-      "source": "git",
-      "dependencies": {
-        "com.unity.xr.management": "3.2.16",
-        "com.unity.xr.legacyinputhelpers": "2.1.2",
-        "com.unity.inputsystem": "1.1.0-preview.1",
-        "com.unity.xr.openxr": "1.4.2"
-      },
-      "hash": "8c0baa899ce4701ff5631f5fada705a8e0e5a97d"
-    },
     "com.unity.adaptiveperformance": {
       "version": "5.0.1",
       "depth": 0,
@@ -357,6 +345,16 @@
         "com.unity.xr.core-utils": "2.1.1"
       },
       "url": "https://packages.unity.cn"
+    },
+    "com.valvesoftware.unity.openvr": {
+      "version": "file:../Assets/SteamVR/OpenVRUnityXRPackage/Editor/com.valvesoftware.unity.openvr-1.1.4.tgz",
+      "depth": 0,
+      "source": "local-tarball",
+      "dependencies": {
+        "com.unity.xr.management": "3.2.13",
+        "com.unity.ugui": "1.0.0",
+        "com.unity.xr.legacyinputhelpers": "2.1.4"
+      }
     },
     "com.unity.modules.ai": {
       "version": "1.0.0",

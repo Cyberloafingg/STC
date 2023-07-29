@@ -40,7 +40,9 @@ public class STCBox : MonoBehaviour
         oriDate = DateTime.ParseExact(oriDateTimeString, "dd/MM/yyyy H:mm", null);
         Debug.Log(oriDate);
         nowDate = oriDate;
-
+        xScale *= transform.localScale.x;
+        yScale *= transform.localScale.y;
+        zScale *= transform.localScale.z;
     }
 
     /// <summary>
