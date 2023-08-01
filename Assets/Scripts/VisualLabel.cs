@@ -52,8 +52,6 @@ public class VisualLabel : MonoBehaviour
     // 设置需要控制的变量
     public int controlledVariable = 0;
 
-    SettingPanel[] canvases;
-
     // 记录上一帧鼠标的位置
     private Vector3 lastMousePosition;
 
@@ -82,7 +80,6 @@ public class VisualLabel : MonoBehaviour
             labelTextList.Add(tmp);
         }
         englishCulture =  new CultureInfo("en-US");
-        canvases = FindObjectsOfType<SettingPanel>();
     }
 
     // Update is called once per frame
@@ -171,23 +168,9 @@ public class VisualLabel : MonoBehaviour
         {
             isMoveLabel = false;
         }
-        if (EventSystem.current.IsPointerOverGameObject())
+        if(Input.mousePosition.y < 200)
         {
-            // 获取鼠标在屏幕空间的位置
-            Vector2 mousePosition = Input.mousePosition;
-
-            // 获取场景中的所有Canvas
-            // 遍历所有Canvas，检测鼠标是否在UI Canvas上
-            foreach (SettingPanel canvas in canvases)
-            {
-                if (IsMouseOverUI(canvas, mousePosition))
-                {
-                    if (canvas.name == "SettingPanel")
-                        //Debug.Log("Mouse is hovering over a Canvas named: " + canvas.name);
-                        return;
-                    // 可以在这里做其他处理
-                }
-            }
+            return;
         }
 
         if (Physics.Raycast(ray, out hit))
