@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class STCBox : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class STCBox : MonoBehaviour
     public DateTime nowDate;   // 当前时间的秒数
 
     CultureInfo englishCulture = new CultureInfo("en-US");
+
+    public Material vrMapMaterial;
 
     /// <summary>
     /// x轴缩放比例
@@ -43,6 +46,8 @@ public class STCBox : MonoBehaviour
         xScale *= transform.localScale.x;
         yScale *= transform.localScale.y;
         zScale *= transform.localScale.z;
+        STCBox.instance.vrMapMaterial.mainTextureScale = new Vector2(1.0f, 1.0f);
+        STCBox.instance.vrMapMaterial.mainTextureOffset = new Vector2(0.0f, 0.0f);
     }
 
     /// <summary>

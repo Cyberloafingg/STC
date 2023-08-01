@@ -66,8 +66,14 @@ public class UpdatePath : MonoBehaviour
         {
             STCBox.instance.xScale += scrollDelta * scrollXZSpeed;
             STCBox.instance.zScale += scrollDelta * scrollXZSpeed;
+            float scale = 1 / STCBox.instance.zScale * 1000;
+            STCBox.instance.vrMapMaterial.mainTextureScale = new Vector2(scale, scale);
+            scale = (scale - 1) * (-0.5f);
+            //STCBox.instance.mapMaterial.SetFloat("_Progress", STCBox.instance.zScale / 1000);
+            STCBox.instance.vrMapMaterial.mainTextureOffset = new Vector2(scale, scale);
+            SettingPanel.instance.UpdateMarkerPosition(STCBox.instance.xScale/1000);
+            UpdateEveryPath();
         }
-        UpdateEveryPath();
     }
 
     /// <summary>

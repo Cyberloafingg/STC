@@ -23,9 +23,9 @@ public class VRUpdatePath : MonoBehaviour
     private bool isAutoMoveOn = false; // 是否开启自由移动
     private int autoMoveTmp = 0; // 自由移动的临时变量
     private int autoMoveAdd = 10; // 自由移动的增量
-    private string lastClickedTag = ""; // 上一次点击的标签
-    private float lastClickTime = 0f; // 上一次点击的时间
-    private float doubleClickInterval = 0.3f; // 双击间隔时间，单位为秒
+    //private string lastClickedTag = ""; // 上一次点击的标签
+    //private float lastClickTime = 0f; // 上一次点击的时间
+    //private float doubleClickInterval = 0.3f; // 双击间隔时间，单位为秒
     private string attentionPathName = ""; // 关注的路径名称
     private bool isAttentionOnePath = false; // 是否关注某一条路径
 
@@ -35,6 +35,9 @@ public class VRUpdatePath : MonoBehaviour
 
     [Tooltip("缩放Y轴的速度"), SerializeField, Range(0.001f,0.01f)]
     float scrollYSpeed = 0.001f;
+
+    public static VRUpdatePath instance;
+
 
     // Start is called before the first frame update
     void Start()
@@ -47,7 +50,6 @@ public class VRUpdatePath : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        ChangeColor();
         if(Input.GetKeyDown(KeyCode.L))
         {
             ColorByTime();
@@ -58,6 +60,14 @@ public class VRUpdatePath : MonoBehaviour
         }
     }
 
+    private void Awake()
+    {
+        instance = this;
+        if (instance == null)
+        {
+            instance = this;
+        }
+    }
 
     public void ScrollByXZAxis()
     {
@@ -182,78 +192,56 @@ public class VRUpdatePath : MonoBehaviour
         }
     }
 
-    void ChangeColor()
+
+    public void ChangeColor(GameObject hitObject)
     {
-        if (Input.GetMouseButtonDown(0))
+        string hitName = hitObject.GetComponent<PathObj>().trackName;
+        if (!isAttentionOnePath)
         {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
 
-            if (Physics.Raycast(ray, out hit))
+            attentionPathName = hitName;
+            isAttentionOnePath = true;
+            Debug.Log("Double click on object: " + hitName);
+            foreach (KeyValuePair<string, List<PathObj>> kvp in pathDic)
             {
-                GameObject hitObject = hit.collider.gameObject;
-                string hitTag = hitObject.tag;
-                
-
-                // 判断是否为双击
-                if (Time.time - lastClickTime < doubleClickInterval && hitTag == "Path" && lastClickedTag == hitTag)
+                string trackNumber = kvp.Key;
+                List<PathObj> paths = kvp.Value;
+                Color color = Color.gray;
+                color.a = 0.1f;
+                for (int i = 0; i < paths.Count; i++)
                 {
-                    string hitName = hitObject.GetComponent<PathObj>().trackName;
-                    // 执行双击操作
-                    if (!isAttentionOnePath)
-                    {                       
-                        attentionPathName = hitName;
-                        isAttentionOnePath = true;
-                        Debug.Log("Double click on object: " + hitName);
-                        foreach (KeyValuePair<string, List<PathObj>> kvp in pathDic)
-                        {
-                            string trackNumber = kvp.Key;
-                            List<PathObj> paths = kvp.Value;
-                            Color color = Color.gray;
-                            color.a = 0.1f;
-                            for (int i = 0; i < paths.Count; i++)
-                            {
-                                if (trackNumber != hitName)
-                                {
-                                    paths[i].GetComponent<Renderer>().material.color = color;
-                                }
-
-                            }
-                        }
-                    }
-                    else
+                    if (trackNumber != hitName)
                     {
-                        isAttentionOnePath = false;
-                        attentionPathName = "";
-                        Debug.Log("Double click on object: " + hitName);
-                        foreach (KeyValuePair<string, List<PathObj>> kvp in pathDic)
-                        {
-                            string trackNumber = kvp.Key;
-                            List<PathObj> paths = kvp.Value;
-                            for (int i = 0; i < paths.Count; i++)
-                            {
-                                if (trackNumber != hitName)
-                                {
-                                    if (isColorByTimeOn)
-                                    {
-                                        paths[i].GetComponent<Renderer>().material.color = paths[i].colorByTime;
-                                    }
-                                    else
-                                    {
-                                        paths[i].GetComponent<Renderer>().material.color = paths[i].color;
-                                    }
-                                }
-                            }
-                        }   
+                        paths[i].GetComponent<Renderer>().material.color = color;
                     }
-                }
-                else
-                {
-                    // 记录上一次点击的信息
-                    lastClickedTag = hitTag;
-                    lastClickTime = Time.time;
+
                 }
             }
+        }
+        else
+        {
+            isAttentionOnePath = false;
+            attentionPathName = "";
+            Debug.Log("Double click on object: " + hitName);
+            foreach (KeyValuePair<string, List<PathObj>> kvp in pathDic)
+            {
+                string trackNumber = kvp.Key;
+                List<PathObj> paths = kvp.Value;
+                for (int i = 0; i < paths.Count; i++)
+                {
+                    if (trackNumber != hitName)
+                    {
+                        if (isColorByTimeOn)
+                        {
+                            paths[i].GetComponent<Renderer>().material.color = paths[i].colorByTime;
+                        }
+                        else
+                        {
+                            paths[i].GetComponent<Renderer>().material.color = paths[i].color;
+                        }
+                    }
+                }
+            }   
         }
     }
 

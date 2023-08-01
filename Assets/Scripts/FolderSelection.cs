@@ -8,7 +8,7 @@ public class FolderSelection : MonoBehaviour
 {
     string stringPath = "";
 
-    public string targetSceneName; // 在Inspector面板中指定要切换到的场景名称
+    //public string targetSceneName; // 在Inspector面板中指定要切换到的场景名称
 
     CanvasGroup canvasGroup;
 
@@ -17,7 +17,7 @@ public class FolderSelection : MonoBehaviour
         canvasGroup = GetComponent<CanvasGroup>();
     }
 
-    public void OpenFolderDialog()
+    public void OpenFolderDialog(string sceneName)
     {
         OpenFileName ofn = new OpenFileName();
 
@@ -48,21 +48,21 @@ public class FolderSelection : MonoBehaviour
             stringPath = System.IO.Path.GetDirectoryName(ofn.file);
             PlayerPrefs.SetString("SelectedFolderPath", stringPath);
             Debug.Log(stringPath);
-            LoadTargetSceneAsync();
+            LoadTargetSceneAsync(sceneName);
         }
     }
 
 
-    public void LoadTargetSceneAsync()
+    public void LoadTargetSceneAsync(string sceneName)
     {
-        StartCoroutine(LoadSceneAsync());
+        StartCoroutine(LoadSceneAsync(sceneName));
     }
 
-    private IEnumerator LoadSceneAsync()
+    private IEnumerator LoadSceneAsync(string sceneName)
     {
         float targetLoadTime = 1.0f; // 目标加载时间为2秒钟
         float timer = 0.0f; // 用于计时的变量
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(targetSceneName);
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
         asyncLoad.allowSceneActivation = false;
 
         while (!asyncLoad.isDone && timer < targetLoadTime)

@@ -81,7 +81,7 @@ public class PathObj : MonoBehaviour
     }
     public void GetTimeType(DateTime startDate,ref Color colorByTime, ref TimeType timeType)
     {
-        int hour = startDate.Hour;
+        int hour = endDate.Hour;
         if (hour >= 0 && hour < 6)
         {
             timeType = TimeType._1;

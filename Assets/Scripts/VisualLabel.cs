@@ -7,6 +7,7 @@ using System.Globalization;
 using Unity.VisualScripting;
 using System.Reflection;
 using Unity.Burst.CompilerServices;
+using UnityEngine.EventSystems;
 //细节当最头伸长时
 
 public class VisualLabel : MonoBehaviour
@@ -51,6 +52,8 @@ public class VisualLabel : MonoBehaviour
     // 设置需要控制的变量
     public int controlledVariable = 0;
 
+    SettingPanel[] canvases;
+
     // 记录上一帧鼠标的位置
     private Vector3 lastMousePosition;
 
@@ -79,6 +82,7 @@ public class VisualLabel : MonoBehaviour
             labelTextList.Add(tmp);
         }
         englishCulture =  new CultureInfo("en-US");
+        canvases = FindObjectsOfType<SettingPanel>();
     }
 
     // Update is called once per frame
@@ -146,6 +150,19 @@ public class VisualLabel : MonoBehaviour
             }
         }
     }
+
+    // 判断鼠标是否在UI上
+    private bool IsMouseOverUI(SettingPanel canvas, Vector2 mousePosition)
+    {
+        // 获取Canvas的RectTransform
+        RectTransform canvasRect = canvas.GetComponent<RectTransform>();
+
+        // 使用RectTransformUtility的ScreenPointToLocalPointInRectangle方法将屏幕坐标转换为Canvas内的本地坐标
+        Vector2 localPosition;
+        bool isInside = RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, mousePosition, null, out localPosition);
+        return isInside;
+    }
+
     void PointerMove()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -153,6 +170,24 @@ public class VisualLabel : MonoBehaviour
         if(Input.GetMouseButtonUp(0))
         {
             isMoveLabel = false;
+        }
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            // 获取鼠标在屏幕空间的位置
+            Vector2 mousePosition = Input.mousePosition;
+
+            // 获取场景中的所有Canvas
+            // 遍历所有Canvas，检测鼠标是否在UI Canvas上
+            foreach (SettingPanel canvas in canvases)
+            {
+                if (IsMouseOverUI(canvas, mousePosition))
+                {
+                    if (canvas.name == "SettingPanel")
+                        //Debug.Log("Mouse is hovering over a Canvas named: " + canvas.name);
+                        return;
+                    // 可以在这里做其他处理
+                }
+            }
         }
 
         if (Physics.Raycast(ray, out hit))
@@ -209,6 +244,15 @@ public class VisualLabel : MonoBehaviour
                 /////////////////////////////////////////////
                 UpdatePath.ScrollByYAxis();
             }
+            if (SettingPanel.instance.isDeleteMarker && hitObject.tag == "Marker")
+            {
+                
+                if (Input.GetMouseButtonDown(0))
+                {
+                    SettingPanel.instance.DeleteMarker(hitObject);
+                    return;
+                }
+            }
             else if(hitObject.name == "Map")
             {
                 if (Input.GetMouseButtonDown(0))
@@ -217,6 +261,7 @@ public class VisualLabel : MonoBehaviour
                     {
                         Vector3 clickPosition = hit.point;
                         SettingPanel.instance.Marking(clickPosition);
+                        return;
                     }
                     else
                     {
@@ -226,7 +271,7 @@ public class VisualLabel : MonoBehaviour
                     }
                 }
                 // 当鼠标拖拽时
-                else if (Input.GetMouseButton(0) && !isMoveLabel && !SettingPanel.instance.isMarking)
+                else if (Input.GetMouseButton(0) && !isMoveLabel && !SettingPanel.instance.isMarking && !SettingPanel.instance.isDeleteMarker)
                 {
                     dragPlane.Raycast(ray, out float distance);
                     Vector3 hitPoint = ray.GetPoint(distance);

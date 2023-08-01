@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using Valve.VR;
 
-public class MoveObjectWithTrigger : MonoBehaviour
+public class VRPlayerController : MonoBehaviour
 {
     public SteamVR_Input_Sources leftInputSource = SteamVR_Input_Sources.LeftHand; // 手柄输入源
     public SteamVR_Input_Sources rightInputSource = SteamVR_Input_Sources.RightHand; // 手柄输入源
@@ -17,7 +17,8 @@ public class MoveObjectWithTrigger : MonoBehaviour
 
     public float snapAngle = 90.0f;
 
-    public float movementSpeed = 1.0f; // 手柄移动对应物体的移动速度
+    [Range(0.0f,1.0f)]
+    public float rightMovementSpeed = 0.5f; // 手柄移动对应物体的移动速度
     public VRUpdatePath UpdatePath;
 
     private Vector3 initLeftPosition;
@@ -131,9 +132,8 @@ public class MoveObjectWithTrigger : MonoBehaviour
     public void RightHandTrigger()
     {
         
-        if (!triggerAction.GetState(leftInputSource) && triggerAction.GetState(rightInputSource))
+        if (!triggerAction.GetState(leftInputSource) && triggerAction.GetState(rightInputSource) && !gripAction.GetState(rightInputSource))
         {
-            Debug.Log("RightHand");
             if (!isRightMoveNow)
             {
                 isRightMoveNow = true;
@@ -145,17 +145,11 @@ public class MoveObjectWithTrigger : MonoBehaviour
 
             // 更新物体的位置
             Vector3 newPosition = pathTransform.position;
-            newPosition.x -= offset.x * movementSpeed;
-            newPosition.z -= offset.z * movementSpeed;
+            newPosition.x -= offset.x * rightMovementSpeed;
+            newPosition.z -= offset.z * rightMovementSpeed;
             pathTransform.position = newPosition;
             //UpdatePath.UpdateEveryPath();
         }
-
-        //if (!triggerAction.GetState(rightInputSource))
-        //{
-        //    isRightMoveNow = false;
-        //    initRightPosition = poseAction.GetLocalPosition(rightInputSource);
-        //}
     }
 
     public void BothHandTrigger()
@@ -175,7 +169,7 @@ public class MoveObjectWithTrigger : MonoBehaviour
             // Calculate the distance between the two controllers in the Y-axis
             float distanceY = Mathf.Abs(poseAction.GetLocalPosition(leftInputSource).y - poseAction.GetLocalPosition(rightInputSource).y) - Mathf.Abs(twoHandDistance.y);
 
-            STCBox.instance.yScale += distanceY * 0.001f;
+            STCBox.instance.yScale += distanceY * 0.0005f;
             UpdatePath.UpdateEveryPath();
         }
         //if (!triggerAction.GetState(rightInputSource) && !triggerAction.GetState(leftInputSource) &&
@@ -206,9 +200,13 @@ public class MoveObjectWithTrigger : MonoBehaviour
 
             // Calculate the distance between the two controllers in the Y-axis
             float distanceX = Mathf.Abs(poseAction.GetLocalPosition(leftInputSource).x - poseAction.GetLocalPosition(rightInputSource).x) - Mathf.Abs(twoHandDistance.x);
-            Debug.Log(distanceX);
             STCBox.instance.xScale += distanceX * 10.0f;
             STCBox.instance.zScale += distanceX * 10.0f;
+            float scale = 1 / STCBox.instance.zScale * 200;
+            STCBox.instance.vrMapMaterial.mainTextureScale = new Vector2(scale, scale);
+            scale = (scale - 1) * (-0.5f);
+            STCBox.instance.vrMapMaterial.mainTextureOffset = new Vector2(scale, scale);
+            VRSettingPanel.instance.UpdateMarkerPosition(STCBox.instance.xScale / 200);
             UpdatePath.UpdateEveryPath();
         }
 

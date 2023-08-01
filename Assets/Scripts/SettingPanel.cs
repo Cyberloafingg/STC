@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class SettingPanel : MonoBehaviour
 {
@@ -12,7 +13,12 @@ public class SettingPanel : MonoBehaviour
 
     public bool isMarking;
 
+    public bool isDeleteMarker;
+
+    public Image markerLabel;
+
     List<GameObject> markerList = new List<GameObject>();
+    List<Vector3> oriMarkerList = new List<Vector3>();
 
     Transform markerParent;
 
@@ -35,7 +41,10 @@ public class SettingPanel : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if(isMarking)
+        {
+            markerLabel.GetComponent<RectTransform>().position = Input.mousePosition;
+        }
     }
 
     public void ReloadScene()
@@ -51,11 +60,22 @@ public class SettingPanel : MonoBehaviour
     public void TurnToMarking()
     {
         isMarking = true;
+        isDeleteMarker = false;
+        markerLabel.enabled = true;
+    }
+
+    public void TurnToDeleteMarker()
+    {
+        isMarking = false;
+        isDeleteMarker = true;
+        markerLabel.enabled = false;
     }
 
     public void TurnToNormal()
     {
         isMarking = false;
+        isDeleteMarker = false;
+        markerLabel.enabled = false;
     }
 
     public void ClearAllMarker()
@@ -73,8 +93,36 @@ public class SettingPanel : MonoBehaviour
 
     public void Marking(Vector3 clickPosition)
     {
-        GameObject markerTmp = Instantiate(markerPrefab, clickPosition, Quaternion.identity,markerParent);
-        
+        float scale = STCBox.instance.xScale / 1000;
+        GameObject markerTmp = Instantiate(markerPrefab, clickPosition, Quaternion.identity,markerParent);  
         markerList.Add(markerTmp);
+        clickPosition = new Vector3(clickPosition.x / scale, clickPosition.y, clickPosition.z / scale);
+        oriMarkerList.Add(clickPosition);
+    }
+
+    public void DeleteMarker(GameObject gameObject)
+    {
+        for(int i = 0; i < markerList.Count; i++)
+        {
+            if (markerList[i] == gameObject)
+            {
+                markerList.RemoveAt(i);
+                oriMarkerList.RemoveAt(i);
+                Destroy(gameObject);
+                return;
+            }
+        }
+    }
+
+    public void UpdateMarkerPosition(float scale)
+    {
+        for(int i = 0; i < markerList.Count; i++)
+        {
+            markerList[i].transform.localPosition = new Vector3(
+                oriMarkerList[i].x * scale,
+                oriMarkerList[i].y, 
+                oriMarkerList[i].z * scale
+            );
+        }
     }
 }

@@ -7,7 +7,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using System;
+using Valve.VR;
 
 namespace Valve.VR.InteractionSystem
 {
@@ -34,27 +34,32 @@ namespace Valve.VR.InteractionSystem
 		protected virtual void OnHandHoverBegin( Hand hand )
 		{
 			currentHand = hand;
-			InputModule.instance.HoverBegin( gameObject );
-			ControllerButtonHints.ShowButtonHint( hand, hand.uiInteractAction);
+			InputModule.instance.HoverBegin(gameObject);
+			if(hand.grabGripAction != null && hand.grabGripAction.GetState(hand.handType))
+			{
+                InputModule.instance.Submit(gameObject);
+				hand.hapticAction.Execute(0, 0.05f, 150, 0.75f, hand.handType);
+                onHandClick.Invoke(currentHand);
+				Debug.Log("Enter");
+            }
 		}
 
 
         //-------------------------------------------------
         protected virtual void OnHandHoverEnd( Hand hand )
 		{
-			InputModule.instance.HoverEnd( gameObject );
-			ControllerButtonHints.HideButtonHint( hand, hand.uiInteractAction);
-			currentHand = null;
+			InputModule.instance.HoverEnd(gameObject);
+            currentHand = null;
 		}
 
 
         //-------------------------------------------------
         protected virtual void HandHoverUpdate( Hand hand )
 		{
-			if ( hand.uiInteractAction != null && hand.uiInteractAction.GetStateDown(hand.handType) )
+			if (hand.grabGripAction != null && hand.grabGripAction.GetStateDown(hand.handType))
 			{
-				InputModule.instance.Submit( gameObject );
-				ControllerButtonHints.HideButtonHint( hand, hand.uiInteractAction);
+				InputModule.instance.Submit(gameObject);
+				//ControllerButtonHints.HideButtonHint(hand, hand.grabGripAction);
 			}
 		}
 
@@ -62,7 +67,8 @@ namespace Valve.VR.InteractionSystem
         //-------------------------------------------------
         protected virtual void OnButtonClick()
 		{
-			onHandClick.Invoke( currentHand );
+			//onHandClick.Invoke( currentHand );
+			//Debug.Log("Click");
 		}
 	}
 

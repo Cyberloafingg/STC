@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Path
   - CanvasLabel
+  - Marker
   layers:
   - Default
   - TransparentFX
