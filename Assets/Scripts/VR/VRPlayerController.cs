@@ -202,11 +202,11 @@ public class VRPlayerController : MonoBehaviour
             float distanceX = Mathf.Abs(poseAction.GetLocalPosition(leftInputSource).x - poseAction.GetLocalPosition(rightInputSource).x) - Mathf.Abs(twoHandDistance.x);
             STCBox.instance.xScale += distanceX * 10.0f;
             STCBox.instance.zScale += distanceX * 10.0f;
-            float scale = 1 / STCBox.instance.zScale * 200;
+            float scale = 1 / STCBox.instance.zScale * (1000 * STCBox.instance.transform.localScale.x);
             STCBox.instance.vrMapMaterial.mainTextureScale = new Vector2(scale, scale);
             scale = (scale - 1) * (-0.5f);
             STCBox.instance.vrMapMaterial.mainTextureOffset = new Vector2(scale, scale);
-            VRSettingPanel.instance.UpdateMarkerPosition(STCBox.instance.xScale / 200);
+            VRSettingPanel.instance.UpdateMarkerPosition(STCBox.instance.xScale / (1000 * STCBox.instance.transform.localScale.x));
             UpdatePath.UpdateEveryPath();
         }
 

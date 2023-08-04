@@ -106,7 +106,7 @@ public class VRVisualLabel : MonoBehaviour
         {
             for (int j = 0; j < labelTextList[i].Count; j++)
             {
-                float tmp = dif * j / STCBox.instance.yScale;
+                float tmp = dif * j / (STCBox.instance.yScale / STCBox.instance.transform.localScale.y);
                 DateTime labelDate = STCBox.instance.nowDate.AddMinutes(-tmp);
                 labelTextList[i][j].text = Date2String(labelDate);
             }
