@@ -11973,8 +11973,6 @@ MonoBehaviour:
   allPathTransform: {fileID: 6934669456224162030}
   mapTransform: {fileID: 1016421556}
   controlledVariable: 0
-  canvases:
-  - {fileID: 2013716450}
 --- !u!1 &1831808590
 GameObject:
   m_ObjectHideFlags: 0
